@@ -22,10 +22,6 @@ def render_rsvp() -> None:
         f"{CONDOMINIO}, confirme seus dados abaixo."
     )
 
-    st.caption(
-        f"{EVENTO_NOME} · {DATA_EVENTO} · {HORA_EVENTO} · {LOCAL_EVENTO}"
-    )
-
     presenca = st.radio(
         "Você vai conseguir comparecer?",
         options=["Sim, estarei lá", "Não vou conseguir comparecer"],
