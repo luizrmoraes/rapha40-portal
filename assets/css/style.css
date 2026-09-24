@@ -1,0 +1,48 @@
+:root {
+    --gold: #c99a45;
+    --gold-soft: rgba(201, 154, 69, 0.25);
+    --black: #090909;
+    --dark-gray: #151515;
+    --silver: #ececec;
+    --muted: #b5b5b5;
+}
+
+[data-testid="stHeader"] {
+    display: none;
+}
+
+[data-testid="stSidebar"] {
+    display: none;
+}
+
+.stApp {
+    background:
+        radial-gradient(circle at 85% 10%, rgba(201, 154, 69, 0.12), transparent 28%),
+        radial-gradient(circle at 10% 95%, rgba(201, 154, 69, 0.08), transparent 25%),
+        var(--black);
+    color: var(--silver);
+}
+
+.block-container {
+    max-width: 680px;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+}
+
+div.stButton > button {
+    width: 100%;
+    min-height: 54px;
+    color: var(--gold);
+    background: rgba(10, 10, 10, 0.85);
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+div.stButton > button:hover {
+    background: var(--gold);
+    color: #090909;
+    border-color: var(--gold);
+}
