@@ -46,3 +46,120 @@ div.stButton > button:hover {
     color: #090909;
     border-color: var(--gold);
 }
+
+/* =========================
+   HOME — RAPHA 40
+   ========================= */
+
+.brand-header {
+    text-align: center;
+    padding: 0.8rem 0 1.7rem;
+}
+
+.brand-name {
+    color: #f0f0f0;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    margin-left: 0.28em;
+}
+
+.brand-forty {
+    display: inline-block;
+    margin-top: 0.35rem;
+    color: #d8a74d;
+    font-size: clamp(5rem, 24vw, 8rem);
+    line-height: 0.82;
+    font-weight: 800;
+    letter-spacing: -0.09em;
+    text-shadow: 0 3px 20px rgba(201, 151, 62, 0.18);
+}
+
+.brand-years {
+    color: #c9973e;
+    font-size: 1.15rem;
+    font-style: italic;
+    letter-spacing: 0.14em;
+    margin-top: -0.15rem;
+}
+
+.brand-line {
+    width: 72px;
+    height: 1px;
+    margin: 1.1rem auto 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #c9973e,
+        transparent
+    );
+}
+
+.home-message {
+    text-align: center;
+    margin: 0 auto 1.7rem;
+    max-width: 460px;
+}
+
+.home-kicker {
+    color: #c9973e;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.20em;
+    margin-bottom: 0.65rem;
+}
+
+.home-title {
+    color: #eeeeee;
+    font-size: 1.35rem;
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.home-message p {
+    margin-top: 1rem;
+    color: #a7a7a7;
+    font-size: 0.98rem;
+    line-height: 1.55;
+}
+
+.event-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+    margin-top: 1.8rem;
+    padding-top: 1.15rem;
+    border-top: 1px solid rgba(201, 151, 62, 0.25);
+    text-align: center;
+}
+
+.event-summary div {
+    color: #f0f0f0;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    padding: 0 0.35rem;
+}
+
+.event-summary span {
+    display: block;
+    color: #c9973e;
+    font-size: 0.61rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    margin-bottom: 0.3rem;
+}
+
+@media (max-width: 420px) {
+    .brand-forty {
+        font-size: 5.5rem;
+    }
+
+    .event-summary div {
+        font-size: 0.72rem;
+    }
+
+    .event-summary span {
+        font-size: 0.56rem;
+    }
+}

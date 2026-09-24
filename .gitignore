@@ -1,0 +1,14 @@
+# Secrets locais
+.streamlit/secrets.toml
+
+# Cache Python
+__pycache__/
+*.py[cod]
+
+# Configurações de IDE
+.vscode/
+.idea/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
