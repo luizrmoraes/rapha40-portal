@@ -6,6 +6,8 @@ from config.settings import (
     EVENTO_NOME,
     HORA_EVENTO,
     LOCAL_EVENTO,
+    ACESSO1,
+    ACESSO2
 )
 
 
@@ -49,6 +51,12 @@ def render_rsvp_confirmado() -> None:
         st.metric("🕒 Horário", HORA_EVENTO)
 
     st.metric("📍 Local", LOCAL_EVENTO)
+
+    st.metric("🗺️ Endereço", ACESSO1)
+
+    st.caption("ou")
+
+    st.metric("🗺️ Endereço", ACESSO2)
 
     st.caption(CONDOMINIO)
 
