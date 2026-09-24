@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import streamlit as st
 
 from config.settings import (
@@ -13,17 +15,15 @@ from config.settings import (
 def render_home() -> None:
     modo = obter_modo_portal()
 
-    st.markdown(
-        """
-        <div class="brand-header">
-            <div class="brand-name">RAPHA</div>
-            <div class="brand-forty">40</div>
-            <div class="brand-years">anos</div>
-            <div class="brand-line"></div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    caminho_hero = Path("assets/images/hero-rapha-40.png")
+
+    if caminho_hero.exists():
+        st.image(
+            str(caminho_hero),
+            use_container_width=True,
+        )
+    else:
+        st.warning("Imagem principal ainda não encontrada.")
 
     if modo == "rsvp":
         render_home_rsvp()
@@ -35,9 +35,6 @@ def render_home_rsvp() -> None:
     st.markdown(
         """
         <div class="home-message">
-            <div class="home-kicker">VOCÊ ESTÁ CONVIDADO PARA</div>
-            <div class="home-title">COMEMORAR COMIGO</div>
-            <p>
                 Depois de tantas histórias, conquistas e desafios,
                 chegou a hora de celebrar mais um capítulo desta jornada.
             </p>
