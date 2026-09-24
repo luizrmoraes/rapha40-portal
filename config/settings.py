@@ -6,6 +6,8 @@ DATA_EVENTO = "10/10/2026"
 HORA_EVENTO = "16h"
 LOCAL_EVENTO = "Churrasqueira 2"
 CONDOMINIO = "Condomínio Be Happy Freguesia"
+ACESSO1 = "Estr. do Capenha, 1467"
+ACESSO2 = "Trav. Cunha Galvão, 205"
 
 TZ_EVENTO = ZoneInfo("America/Sao_Paulo")
 
