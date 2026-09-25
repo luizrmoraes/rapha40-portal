@@ -180,27 +180,21 @@ def carregar_resumo() -> dict:
             cursor.execute(
                 """
                 select
-                    count(*) as respostas,
-                    count(*) filter (
-                        where vai_comparecer = true
-                          and status = 'confirmado'
-                    ) as confirmados,
-                    count(*) filter (
-                        where vai_comparecer = false
-                          and status = 'recusado'
-                    ) as recusados,
-                    coalesce(
-                        sum(
-                            case
-                                when vai_comparecer = true
-                                 and status = 'confirmado'
-                                then quantidade_criancas
-                                else 0
-                            end
-                        ),
-                        0
-                    ) as criancas
-                from public.rsvps;
+                    (select count(*)
+                    from public.rsvps) as respostas,
+
+                    (select count(*)
+                    from public.vw_lista_portaria) as confirmados,
+
+                    (select count(*)
+                    from public.rsvps
+                    where vai_comparecer = false
+                    and status = 'recusado') as recusados,
+
+                    (select coalesce(sum(quantidade_criancas), 0)
+                    from public.rsvps
+                    where vai_comparecer = true
+                    and status = 'confirmado') as criancas;
                 """
             )
 
