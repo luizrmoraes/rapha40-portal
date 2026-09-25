@@ -6,6 +6,7 @@ from views.home import render_home
 from views.rsvp import render_rsvp
 from views.rsvp_confirmado import render_rsvp_confirmado
 from views.rsvp_recusado import render_rsvp_recusado
+from views.admin import render_admin, render_admin_login
 
 
 st.set_page_config(
@@ -35,6 +36,12 @@ if modo == "rsvp":
 
     elif st.session_state.tela == "recusado":
         render_rsvp_recusado()
+
+    elif st.session_state.tela == "admin_login":
+        render_admin_login()
+
+    elif st.session_state.tela == "admin":
+        render_admin()
 
     else:
         st.session_state.tela = "home"
