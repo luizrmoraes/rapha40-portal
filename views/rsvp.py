@@ -125,6 +125,18 @@ def renderizar_confirmacao() -> None:
 
     salvar_e_ir_para_resultado(dados_rsvp)
 
+def tentar_abrir_admin(nome: str) -> bool:
+    """
+    Ativa a rota administrativa somente quando o usuário:
+    1. selecionou que não irá ao evento;
+    2. digitou exatamente 'admin'.
+    """
+    if nome.strip().casefold() != "admin":
+        return False
+
+    st.session_state.tela = "admin_login"
+    st.rerun()
+    return True
 
 def renderizar_recusa() -> None:
     nome_principal = st.text_input(
@@ -144,6 +156,11 @@ def renderizar_recusa() -> None:
     if not enviar_recusa:
         return
 
+    # Entrada discreta para a área administrativa.
+    # Não grava 'admin' no banco.
+    if tentar_abrir_admin(nome_principal):
+        return
+
     if len(nome_principal.strip()) < 3:
         st.error("Informe seu nome completo.")
         return
@@ -156,7 +173,6 @@ def renderizar_recusa() -> None:
     }
 
     salvar_e_ir_para_resultado(dados_rsvp)
-
 
 def salvar_e_ir_para_resultado(dados_rsvp: dict) -> None:
     try:
