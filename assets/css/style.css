@@ -1,24 +1,25 @@
+/* CSS unificado do portal Rapha 40 */
+
 :root {
     --gold: #c99a45;
-    --gold-soft: rgba(201, 154, 69, 0.25);
+    --gold-light: #e0ad55;
+    --gold-soft: rgba(201, 154, 69, .25);
     --black: #090909;
-    --dark-gray: #151515;
     --silver: #ececec;
-    --muted: #b5b5b5;
+    --muted: #a9a9a9;
+    --paper: #fffdf8;
+    --ink: #342b27;
 }
 
-[data-testid="stHeader"] {
-    display: none;
-}
-
+[data-testid="stHeader"],
 [data-testid="stSidebar"] {
     display: none;
 }
 
 .stApp {
     background:
-        radial-gradient(circle at 85% 10%, rgba(201, 154, 69, 0.12), transparent 28%),
-        radial-gradient(circle at 10% 95%, rgba(201, 154, 69, 0.08), transparent 25%),
+        radial-gradient(circle at 85% 10%, rgba(201, 154, 69, .12), transparent 28%),
+        radial-gradient(circle at 10% 95%, rgba(201, 154, 69, .08), transparent 25%),
         var(--black);
     color: var(--silver);
 }
@@ -33,133 +34,274 @@ div.stButton > button {
     width: 100%;
     min-height: 54px;
     color: var(--gold);
-    background: rgba(10, 10, 10, 0.85);
+    background: rgba(10, 10, 10, .85);
     border: 1px solid var(--gold);
     border-radius: 10px;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: .08em;
     text-transform: uppercase;
 }
 
 div.stButton > button:hover {
     background: var(--gold);
-    color: #090909;
+    color: var(--black);
     border-color: var(--gold);
 }
 
-/* =========================
-   HOME — RAPHA 40
-   ========================= */
-
+/* Identidade da Home */
 .brand-header {
+    padding: .8rem 0 1.7rem;
     text-align: center;
-    padding: 0.8rem 0 1.7rem;
 }
 
 .brand-name {
     color: #f0f0f0;
     font-size: 1rem;
     font-weight: 700;
-    letter-spacing: 0.28em;
-    margin-left: 0.28em;
+    letter-spacing: .28em;
 }
 
 .brand-forty {
     display: inline-block;
-    margin-top: 0.35rem;
+    margin-top: .35rem;
     color: #d8a74d;
     font-size: clamp(5rem, 24vw, 8rem);
-    line-height: 0.82;
+    line-height: .82;
     font-weight: 800;
-    letter-spacing: -0.09em;
-    text-shadow: 0 3px 20px rgba(201, 151, 62, 0.18);
+    letter-spacing: -.09em;
+    text-shadow: 0 3px 20px rgba(201, 151, 62, .18);
 }
 
 .brand-years {
+    margin-top: -.15rem;
     color: #c9973e;
     font-size: 1.15rem;
     font-style: italic;
-    letter-spacing: 0.14em;
-    margin-top: -0.15rem;
+    letter-spacing: .14em;
 }
 
 .brand-line {
     width: 72px;
     height: 1px;
     margin: 1.1rem auto 0;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        #c9973e,
-        transparent
-    );
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 
 .home-message {
-    text-align: center;
-    margin: 0 auto 1.7rem;
     max-width: 460px;
+    margin: 0 auto 1.7rem;
+    text-align: center;
 }
 
 .home-kicker {
+    margin-bottom: .65rem;
     color: #c9973e;
-    font-size: 0.7rem;
+    font-size: .7rem;
     font-weight: 600;
-    letter-spacing: 0.20em;
-    margin-bottom: 0.65rem;
+    letter-spacing: .2em;
 }
 
 .home-title {
-    color: #eeeeee;
+    color: #eee;
     font-size: 1.35rem;
-    line-height: 1.25;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: .08em;
 }
 
 .home-message p {
     margin-top: 1rem;
     color: #a7a7a7;
-    font-size: 0.98rem;
+    font-size: .98rem;
     line-height: 1.55;
 }
 
 .event-summary {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.4rem;
+    gap: .4rem;
     margin-top: 1.8rem;
     padding-top: 1.15rem;
-    border-top: 1px solid rgba(201, 151, 62, 0.25);
+    border-top: 1px solid var(--gold-soft);
     text-align: center;
 }
 
 .event-summary div {
+    padding: 0 .35rem;
     color: #f0f0f0;
-    font-size: 0.82rem;
+    font-size: .82rem;
     line-height: 1.35;
-    padding: 0 0.35rem;
 }
 
 .event-summary span {
     display: block;
+    margin-bottom: .3rem;
     color: #c9973e;
-    font-size: 0.61rem;
+    font-size: .61rem;
     font-weight: 700;
-    letter-spacing: 0.14em;
-    margin-bottom: 0.3rem;
+    letter-spacing: .14em;
 }
 
-@media (max-width: 420px) {
-    .brand-forty {
-        font-size: 5.5rem;
-    }
+/* Imagens e diálogos */
+[data-testid="stImage"] img {
+    max-height: 330px;
+    margin: 0 auto;
+    object-fit: contain;
+}
 
-    .event-summary div {
-        font-size: 0.72rem;
-    }
+[role="dialog"] [data-testid="stImage"] img {
+    width: auto;
+    max-width: 100%;
+    max-height: 80vh;
+    height: auto;
+    object-fit: contain;
+}
 
-    .event-summary span {
-        font-size: 0.56rem;
-    }
+/* Cartões Polaroid */
+.rapha-polaroid {
+    box-sizing: border-box;
+    width: min(100%, 430px);
+    margin: 10px auto 22px;
+    padding: 12px 12px 18px;
+    background: var(--paper);
+    border: 1px solid #ece8df;
+    box-shadow: 0 9px 22px rgba(40, 31, 25, .16);
+    transform: rotate(-.6deg);
+    color: var(--ink);
+}
+
+.rapha-polaroid__photo-frame {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 190px;
+    padding: 10px;
+    background: #f4f0e9;
+}
+
+.rapha-polaroid__photo {
+    display: block;
+    width: 100%;
+    max-height: 330px;
+    object-fit: contain;
+}
+
+.rapha-polaroid__missing {
+    display: grid;
+    min-height: 180px;
+    place-items: center;
+    background: #eeeae3;
+    color: #665d56;
+    text-align: center;
+}
+
+.rapha-polaroid__text {
+    padding: 16px 7px 0;
+    overflow-wrap: anywhere;
+    text-align: center;
+}
+
+.rapha-polaroid__title { margin: 0; font-size: 1.05rem; font-weight: 600; }
+.rapha-polaroid__caption { margin: 7px 0 0; font-size: .92rem; line-height: 1.4; }
+.rapha-polaroid__meta { margin: 8px 0 0; font-size: .78rem; opacity: .74; }
+
+/* Controles de fotos */
+[data-testid="stPills"] {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: -12px auto 22px;
+}
+
+[data-testid="stPills"] > div { justify-content: center; }
+
+[data-testid="stPills"] button {
+    min-height: 28px;
+    padding: 3px 9px;
+    color: #665d56;
+    background: transparent;
+    border: 0;
+    font-size: .76rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+[data-testid="stPills"] button:hover { color: var(--ink); }
+
+/* Portal da festa */
+.festa-hero-caption {
+    max-width: 540px;
+    margin: .9rem auto 1.45rem;
+    text-align: center;
+}
+
+.festa-hero-caption h2 {
+    margin: .48rem 0 .45rem;
+    color: #eee;
+    font-size: 1.35rem;
+    letter-spacing: .04em;
+}
+
+.festa-hero-caption p {
+    margin: 0;
+    color: var(--muted);
+    font-size: .9rem;
+    line-height: 1.55;
+}
+
+.festa-hero-kicker {
+    color: #c9973e;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .22em;
+}
+
+.festa-divider {
+    width: 100%;
+    height: 1px;
+    margin: 1.35rem 0 1.15rem;
+    background: linear-gradient(90deg, transparent, rgba(201, 154, 69, .72), transparent);
+}
+
+.festa-section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: .85rem;
+    margin-bottom: .8rem;
+}
+
+.festa-section-icon { flex: 0 0 auto; margin-top: .05rem; font-size: 1.4rem; color: var(--muted);}
+
+.festa-section-heading h3 {
+    margin: 0 0 .28rem;
+    color: #eee;
+    font-size: 1.08rem;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+}
+
+.festa-section-heading p {
+    margin: 0;
+    color: var(--muted);
+    font-size: .88rem;
+    line-height: 1.5;
+}
+
+.festa-footer-note {
+    margin: 1.7rem auto .3rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(201, 154, 69, .2);
+    color: #858585;
+    font-size: .78rem;
+    font-style: italic;
+    text-align: center;
+}
+
+/* Ajustes móveis */
+@media (max-width: 480px) {
+    .brand-forty { font-size: 5.5rem; }
+    .event-summary div { font-size: .72rem; }
+    .event-summary span { font-size: .56rem; }
+    .rapha-polaroid { padding: 9px 9px 16px; transform: none; }
+    .rapha-polaroid__photo { max-height: 65vh; }
 }
