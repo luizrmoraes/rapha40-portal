@@ -1,47 +1,38 @@
-"""Acesso aos metadados do portal Rapha 40 no PostgreSQL/Supabase.
-
-Arquivos de imagem sao enviados/baixados pela Storage API em outro modulo.
-Nao guarde bytes das imagens nas tabelas nem use SQL em storage.objects.
-"""
+"""Repositorios PostgreSQL do portal Rapha 40."""
 
 from __future__ import annotations
 
-from typing import Any
+from collections.abc import Callable
+from typing import Any, TypeVar
 from uuid import UUID
 
 from psycopg2.extras import RealDictCursor
 
-from core.database import get_connection
+from core.database import executar_db, executar_leitura
+
+T = TypeVar("T")
 
 
-def _ler(sql: str, parametros: tuple[Any, ...] = (), *, um: bool = False):
-    connection = get_connection()
-    try:
+def _buscar(sql: str, parametros: tuple[Any, ...] = (), *, um: bool = False):
+    def operacao(connection):
         with connection.cursor(cursor_factory=RealDictCursor) as cursor:
             cursor.execute(sql, parametros)
-            resultado = cursor.fetchone() if um else cursor.fetchall()
-            return dict(resultado) if um and resultado else (
-                [dict(linha) for linha in resultado] if not um else None
-            )
-    except Exception:
-        connection.rollback()
-        raise
-    finally:
-        # Conexao em cache: finalizar inclusive transacoes somente-leitura.
-        connection.rollback()
+            if um:
+                linha = cursor.fetchone()
+                return dict(linha) if linha else None
+            return [dict(linha) for linha in cursor.fetchall()]
+
+    return executar_leitura(operacao)
 
 
-def _escrever(sql: str, parametros: tuple[Any, ...]) -> dict[str, Any]:
-    connection = get_connection()
-    try:
+def _alterar(sql: str, parametros: tuple[Any, ...]) -> dict[str, Any] | None:
+    def operacao(connection):
         with connection.cursor(cursor_factory=RealDictCursor) as cursor:
             cursor.execute(sql, parametros)
             linha = cursor.fetchone()
-        connection.commit()
-        return dict(linha) if linha is not None else None
-    except Exception:
-        connection.rollback()
-        raise
+            return dict(linha) if linha else None
+
+    return executar_db(operacao)
 
 
 def criar_rsvp(
@@ -50,22 +41,20 @@ def criar_rsvp(
     quantidade_criancas: int = 0,
     acompanhantes: list[str] | None = None,
 ) -> str:
-    """Salva titular e acompanhantes numa mesma transacao."""
     nome = nome_principal.strip()
-    nomes_acompanhantes = [n.strip() for n in (acompanhantes or [])]
+    nomes = [nome_item.strip() for nome_item in (acompanhantes or [])]
     if len(nome) < 3:
         raise ValueError("Informe o nome completo.")
     if not isinstance(vai_comparecer, bool):
-        raise ValueError("Presenca invalida.")
-    if any(len(n) < 3 for n in nomes_acompanhantes):
+        raise ValueError("Presença inválida.")
+    if any(len(nome_item) < 3 for nome_item in nomes):
         raise ValueError("Informe o nome completo de cada acompanhante.")
-    if not vai_comparecer and (nomes_acompanhantes or quantidade_criancas):
-        raise ValueError("Recusas nao podem incluir acompanhantes ou criancas.")
+    if not vai_comparecer and (nomes or quantidade_criancas):
+        raise ValueError("Recusas não podem incluir acompanhantes ou crianças.")
     if not isinstance(quantidade_criancas, int) or quantidade_criancas < 0:
-        raise ValueError("Quantidade de criancas invalida.")
+        raise ValueError("Quantidade de crianças inválida.")
 
-    connection = get_connection()
-    try:
+    def operacao(connection):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -82,7 +71,7 @@ def criar_rsvp(
                 ),
             )
             rsvp_id = cursor.fetchone()[0]
-            for acompanhante in nomes_acompanhantes:
+            for acompanhante in nomes:
                 cursor.execute(
                     """
                     insert into public.rsvp_acompanhantes (rsvp_id, nome_completo)
@@ -90,21 +79,19 @@ def criar_rsvp(
                     """,
                     (rsvp_id, acompanhante),
                 )
-        connection.commit()
-        return str(rsvp_id)
-    except Exception:
-        connection.rollback()
-        raise
+            return str(rsvp_id)
+
+    return executar_db(operacao)
 
 
 def carregar_lista_portaria() -> list[dict[str, Any]]:
-    return _ler(
+    return _buscar(
         "select nome, tipo from public.vw_lista_portaria order by nome, tipo;"
     )
 
 
 def carregar_resumo() -> dict[str, Any]:
-    return _ler(
+    return _buscar(
         """
         select
             (select count(*) from public.rsvps) as respostas,
@@ -118,14 +105,20 @@ def carregar_resumo() -> dict[str, Any]:
     )
 
 
-def listar_fotos_historicas(*, somente_ativas: bool = True) -> list[dict[str, Any]]:
-    return _ler(
-        """
-        select id, titulo, legenda, ano, thumb_path, display_path,
-               thumb_bytes, display_bytes, ordem, ativo, criado_em
+def listar_fotos_historicas(
+    *, somente_ativas: bool = True, mais_recentes: bool = False
+) -> list[dict[str, Any]]:
+    direcao = "desc" if mais_recentes else "asc"
+    return _buscar(
+        f"""
+        select id, titulo, legenda, ano, mes, data_estimada,
+               thumb_path, display_path, thumb_bytes, display_bytes,
+               ordem, ativo, criado_em
         from public.fotos_historicas
         where (%s = false or ativo = true)
-        order by ordem, criado_em, id;
+        order by (ano is null) asc, ano {direcao},
+                 coalesce(mes, 0) {direcao}, ordem asc,
+                 criado_em asc, id asc;
         """,
         (somente_ativas,),
     )
@@ -134,7 +127,7 @@ def listar_fotos_historicas(*, somente_ativas: bool = True) -> list[dict[str, An
 def listar_memorias_aprovadas(*, limite: int = 100) -> list[dict[str, Any]]:
     if not 1 <= limite <= 500:
         raise ValueError("Limite deve estar entre 1 e 500.")
-    return _ler(
+    return _buscar(
         """
         select id, nome_convidado, frase, display_path, criado_em
         from public.memorias_festa
@@ -147,10 +140,9 @@ def listar_memorias_aprovadas(*, limite: int = 100) -> list[dict[str, Any]]:
 
 
 def listar_memorias_admin(*, limite: int = 200) -> list[dict[str, Any]]:
-    """Chamar somente depois da verificacao de admin na camada de interface."""
     if not 1 <= limite <= 500:
         raise ValueError("Limite deve estar entre 1 e 500.")
-    return _ler(
+    return _buscar(
         """
         select id, nome_convidado, frase, original_path, original_nome,
                original_mime, original_bytes, original_sha256,
@@ -165,9 +157,23 @@ def listar_memorias_admin(*, limite: int = 200) -> list[dict[str, Any]]:
     )
 
 
+def listar_memorias_pendentes(*, limite: int = 200) -> list[dict[str, Any]]:
+    if not 1 <= limite <= 500:
+        raise ValueError("Limite deve estar entre 1 e 500.")
+    return _buscar(
+        """
+        select id, nome_convidado, frase, display_path, criado_em
+        from public.memorias_festa
+        where status_publicacao = 'pendente'
+        order by criado_em asc, id asc
+        limit %s;
+        """,
+        (limite,),
+    )
+
+
 def carregar_uso_fotos() -> list[dict[str, Any]]:
-    """Estimativa baseada nos metadados; nao e a quota oficial do Storage."""
-    return _ler(
+    return _buscar(
         """
         select categoria, fotos, bytes_reduzidas, bytes_exibicao, bytes_originais
         from public.vw_uso_fotos order by categoria;
@@ -176,32 +182,23 @@ def carregar_uso_fotos() -> list[dict[str, Any]]:
 
 
 def criar_memoria(
-    *,
-    nome_convidado: str | None,
-    frase: str | None,
-    original_path: str,
-    original_nome: str,
-    original_mime: str,
-    original_bytes: int,
-    original_sha256: str,
-    display_path: str,
-    display_bytes: int,
+    *, nome_convidado: str | None, frase: str | None,
+    original_path: str, original_nome: str, original_mime: str,
+    original_bytes: int, original_sha256: str,
+    display_path: str, display_bytes: int,
 ) -> str:
-    """Registra metadados APOS confirmar uploads do original e da reduzida.
-
-    Em caso de erro, o modulo de upload deve tentar remover os objetos enviados.
-    """
     if not original_path or not display_path or not original_nome:
-        raise ValueError("Caminhos e nome do original sao obrigatorios.")
+        raise ValueError("Caminhos e nome do original são obrigatórios.")
     if original_bytes <= 0 or display_bytes <= 0:
         raise ValueError("Tamanhos dos arquivos devem ser positivos.")
     if len(original_sha256) != 64 or any(
-        c not in "0123456789abcdefABCDEF" for c in original_sha256
+        caractere not in "0123456789abcdefABCDEF" for caractere in original_sha256
     ):
-        raise ValueError("SHA-256 invalido.")
+        raise ValueError("SHA-256 inválido.")
     if frase is not None and len(frase) > 280:
-        raise ValueError("Frase deve ter ate 280 caracteres.")
-    linha = _escrever(
+        raise ValueError("Frase deve ter até 280 caracteres.")
+
+    linha = _alterar(
         """
         insert into public.memorias_festa
             (nome_convidado, frase, original_path, original_nome,
@@ -213,23 +210,19 @@ def criar_memoria(
         (
             nome_convidado.strip() or None if nome_convidado is not None else None,
             frase.strip() or None if frase is not None else None,
-            original_path,
-            original_nome,
-            original_mime,
-            original_bytes,
-            original_sha256.lower(),
-            display_path,
-            display_bytes,
+            original_path, original_nome, original_mime, original_bytes,
+            original_sha256.lower(), display_path, display_bytes,
         ),
     )
+    if not linha:
+        raise RuntimeError("Memória não foi registrada.")
     return str(linha["id"])
 
 
 def definir_publicacao(memoria_id: str | UUID, status: str) -> bool:
-    """Admin: aprova ou rejeita; a tela chamadora deve validar a sessao."""
     if status not in {"aprovado", "rejeitado", "pendente"}:
-        raise ValueError("Status de publicacao invalido.")
-    linha = _escrever(
+        raise ValueError("Status de publicação inválido.")
+    linha = _alterar(
         """
         update public.memorias_festa
         set status_publicacao = %s, atualizado_em = now()
@@ -237,25 +230,16 @@ def definir_publicacao(memoria_id: str | UUID, status: str) -> bool:
         returning id;
         """,
         (status, str(memoria_id)),
-    ) if _memoria_existe(memoria_id) else None
+    )
     return linha is not None
-
-
-def _memoria_existe(memoria_id: str | UUID) -> bool:
-    return _ler(
-        "select id from public.memorias_festa where id = %s;",
-        (str(memoria_id),),
-        um=True,
-    ) is not None
 
 
 def registrar_exportacao(
     memoria_id: str | UUID, *, destino: str, referencia: str | None = None
 ) -> bool:
-    """Marcar somente quando o download/copia ao destino terminou."""
     if destino not in {"drive", "celular", "computador", "outro"}:
-        raise ValueError("Destino de backup invalido.")
-    linha = _escrever(
+        raise ValueError("Destino de backup inválido.")
+    linha = _alterar(
         """
         update public.memorias_festa
         set status_arquivo = 'exportado', destino_backup = %s,
@@ -265,41 +249,25 @@ def registrar_exportacao(
         returning id;
         """,
         (destino, referencia, str(memoria_id)),
-    ) if _status_arquivo_permite(memoria_id, {"no_supabase", "exportado"}) else None
+    )
     return linha is not None
 
 
 def registrar_verificacao(memoria_id: str | UUID) -> bool:
-    """Admin confirma que a copia externa abre e corresponde ao original."""
-    linha = _escrever(
+    linha = _alterar(
         """
         update public.memorias_festa
-        set status_arquivo = 'verificado', verificado_em = now(),
-            atualizado_em = now()
+        set status_arquivo = 'verificado', verificado_em = now(), atualizado_em = now()
         where id = %s and status_arquivo = 'exportado'
         returning id;
         """,
         (str(memoria_id),),
-    ) if _status_arquivo_permite(memoria_id, {"exportado"}) else None
+    )
     return linha is not None
 
 
-def _status_arquivo_permite(memoria_id: str | UUID, estados: set[str]) -> bool:
-    linha = _ler(
-        "select status_arquivo from public.memorias_festa where id = %s;",
-        (str(memoria_id),),
-        um=True,
-    )
-    return bool(linha and linha["status_arquivo"] in estados)
-
-
 def registrar_original_removido(memoria_id: str | UUID) -> bool:
-    """Chamar SOMENTE depois da exclusao confirmada via Storage API.
-
-    Se a remocao falhar, nao chame esta funcao: o banco deve refletir
-    que o original ainda ocupa espaco no bucket.
-    """
-    linha = _escrever(
+    linha = _alterar(
         """
         update public.memorias_festa
         set status_arquivo = 'removido', original_path = null,
@@ -309,5 +277,5 @@ def registrar_original_removido(memoria_id: str | UUID) -> bool:
         returning id;
         """,
         (str(memoria_id),),
-    ) if _status_arquivo_permite(memoria_id, {"verificado"}) else None
+    )
     return linha is not None
